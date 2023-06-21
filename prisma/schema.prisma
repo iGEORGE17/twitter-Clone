@@ -1,0 +1,50 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum TOKEN_TYPE {
+  EMAIL
+  API
+}
+
+model Token {
+  id         String     @id @default(auto()) @map("_id") @db.ObjectId
+  type       TOKEN_TYPE
+  emailToken String?    @unique
+  valid      Boolean    @default(true)
+  expiration DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @db.ObjectId
+}
+
+model User {
+  id         String  @id @default(auto()) @map("_id") @db.ObjectId
+  email      String  @unique
+  name       String?
+  username   String? @unique
+  image      String?
+  bio        String?
+  isVerified Boolean @default(false)
+  Tweets     Tweet[]
+  Tokens     Token[]
+}
+
+model Tweet {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  content   String
+  image     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @db.ObjectId
+}
